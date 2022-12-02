@@ -29,4 +29,4 @@ class Solution:
 
 if __name__ == "__main__":
     s = Solution()
-    s.submit_puzzle(s.solve())
+    s.aocd.submit_puzzle(s.solve())
