@@ -1,4 +1,3 @@
-import inspect
 import pathlib
 
 import aocd
@@ -6,20 +5,23 @@ import aocd
 class AOCD:
     def __init__(self, file_path):
         self.file_path = file_path
-        self.data = aocd.data
         self.calling_file = pathlib.PurePath(self.file_path)
         self.text_file = f"{self.calling_file.with_stem(self.calling_file.stem.rstrip('ab_')).stem}.txt"
+        if not (pathlib.Path(self.text_file).is_file() and pathlib.Path(self.text_file).stat().st_size):
+            self.save_puzzle(self.download_puzzle())
+        self.puzzle = self.get_puzzle()
 
-    def get_caller(self):
-        self.frame = inspect.currentframe().f_back.f_back
-        self.caller = self.frame.f_code
-        self.filename = pathlib.PurePath(self.caller.co_filename)
-        self.filename_base = self.filename.with_stem(self.filename.stem.rstrip("ab_"))
-        return self.filename_base.stem
+    def download_puzzle(self):
+        return aocd.data
+
+    def get_puzzle(self):
+        with open(self.text_file, "r") as f:
+            self.puzzle = f.readlines()
+        return self.puzzle
 
     def save_puzzle(self, data):
-        with open(f"{self.get_caller()}.txt", "w") as f:
-            f.write(self.data)
+        with open(self.text_file, "w") as f:
+            f.write(data)
 
     def submit_puzzle(self, answer):
         return aocd.submit(answer)
