@@ -1,0 +1,181 @@
+[V]     [B]                     [C]
+[C]     [N] [G]         [W]     [P]
+[W]     [C] [Q] [S]     [C]     [M]
+[L]     [W] [B] [Z]     [F] [S] [V]
+[R]     [G] [H] [F] [P] [V] [M] [T]
+[M] [L] [R] [D] [L] [N] [P] [D] [W]
+[F] [Q] [S] [C] [G] [G] [Z] [P] [N]
+[Q] [D] [P] [L] [V] [D] [D] [C] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 1 from 9 to 2
+
+
+[V]     [B]
+[C]     [N] [G]         [W]     [P]
+[W]     [C] [Q] [S]     [C]     [M]
+[L]     [W] [B] [Z]     [F] [S] [V]
+[R] [C] [G] [H] [F] [P] [V] [M] [T]
+[M] [L] [R] [D] [L] [N] [P] [D] [W]
+[F] [Q] [S] [C] [G] [G] [Z] [P] [N]
+[Q] [D] [P] [L] [V] [D] [D] [C] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+
+move 4 from 6 to 1
+
+[D]
+[G]
+[N]
+[P]
+[V]     [B]
+[C]     [N] [G]         [W]     [P]
+[W]     [C] [Q] [S]     [C]     [M]
+[L]     [W] [B] [Z]     [F] [S] [V]
+[R] [C] [G] [H] [F]     [V] [M] [T]
+[M] [L] [R] [D] [L]     [P] [D] [W]
+[F] [Q] [S] [C] [G]     [Z] [P] [N]
+[Q] [D] [P] [L] [V]     [D] [C] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 4 from 2 to 6
+
+[D]
+[G]
+[N]
+[P]
+[V]     [B]
+[C]     [N] [G]         [W]     [P]
+[W]     [C] [Q] [S]     [C]     [M]
+[L]     [W] [B] [Z]     [F] [S] [V]
+[R]     [G] [H] [F] [D] [V] [M] [T]
+[M]     [R] [D] [L] [Q] [P] [D] [W]
+[F]     [S] [C] [G] [L] [Z] [P] [N]
+[Q]     [P] [L] [V] [C] [D] [C] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 5 from 8 to 7
+
+[D]                     [C]
+[G]                     [P]
+[N]                     [D]
+[P]                     [M]
+[V]     [B]             [S]
+[C]     [N] [G]         [W]     [P]
+[W]     [C] [Q] [S]     [C]     [M]
+[L]     [W] [B] [Z]     [F]     [V]
+[R]     [G] [H] [F] [D] [V]     [T]
+[M]     [R] [D] [L] [Q] [P]     [W]
+[F]     [S] [C] [G] [L] [Z]     [N]
+[Q]     [P] [L] [V] [C] [D]     [Z]
+ 1   2   3   4   5   6   7   8   9
+
+
+move 4 from 9 to 2
+
+[D]                     [C]
+[G]                     [P]
+[N]                     [D]
+[P]                     [M]
+[V]     [B]             [S]
+[C]     [N] [G]         [W]
+[W]     [C] [Q] [S]     [C]
+[L]     [W] [B] [Z]     [F]
+[R] [T] [G] [H] [F] [D] [V]
+[M] [V] [R] [D] [L] [Q] [P]     [W]
+[F] [M] [S] [C] [G] [L] [Z]     [N]
+[Q] [P] [P] [L] [V] [C] [D]     [Z]
+ 1   2   3   4   5   6   7   8   9
+
+
+move 1 from 5 to 8
+
+[D]                     [C]
+[G]                     [P]
+[N]                     [D]
+[P]                     [M]
+[V]     [B]             [S]
+[C]     [N] [G]         [W]
+[W]     [C] [Q]         [C]
+[L]     [W] [B] [Z]     [F]
+[R] [T] [G] [H] [F] [D] [V]
+[M] [V] [R] [D] [L] [Q] [P]     [W]
+[F] [M] [S] [C] [G] [L] [Z]     [N]
+[Q] [P] [P] [L] [V] [C] [D] [S] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 1 from 3 to 1
+
+[B]
+[D]                     [C]
+[G]                     [P]
+[N]                     [D]
+[P]                     [M]
+[V]                     [S]
+[C]     [N] [G]         [W]
+[W]     [C] [Q]         [C]
+[L]     [W] [B] [Z]     [F]
+[R] [T] [G] [H] [F] [D] [V]
+[M] [V] [R] [D] [L] [Q] [P]     [W]
+[F] [M] [S] [C] [G] [L] [Z]     [N]
+[Q] [P] [P] [L] [V] [C] [D] [S] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 2 from 3 to 1
+
+[C]
+[N]
+[B]
+[D]                     [C]
+[G]                     [P]
+[N]                     [D]
+[P]                     [M]
+[V]                     [S]
+[C]         [G]         [W]
+[W]         [Q]         [C]
+[L]     [W] [B] [Z]     [F]
+[R] [T] [G] [H] [F] [D] [V]
+[M] [V] [R] [D] [L] [Q] [P]     [W]
+[F] [M] [S] [C] [G] [L] [Z]     [N]
+[Q] [P] [P] [L] [V] [C] [D] [S] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 1 from 4 to 2
+
+[C]
+[N]
+[B]
+[D]                     [C]
+[G]                     [P]
+[N]                     [D]
+[P]                     [M]
+[V]                     [S]
+[C]                     [W]
+[W]         [Q]         [C]
+[L] [G] [W] [B] [Z]     [F]
+[R] [T] [G] [H] [F] [D] [V]
+[M] [V] [R] [D] [L] [Q] [P]     [W]
+[F] [M] [S] [C] [G] [L] [Z]     [N]
+[Q] [P] [P] [L] [V] [C] [D] [S] [Z]
+ 1   2   3   4   5   6   7   8   9
+
+move 11 from 7 to 2
+
+    [Z]
+[C] [P]
+[N] [V]
+[B] [F]
+[D] [C]
+[G] [W]
+[N] [S]
+[P] [M]
+[V] [D]
+[C] [P]
+[W] [C]     [Q]
+[L] [G] [W] [B] [Z]
+[R] [T] [G] [H] [F] [D]
+[M] [V] [R] [D] [L] [Q]         [W]
+[F] [M] [S] [C] [G] [L]         [N]
+[Q] [P] [P] [L] [V] [C] [D] [S] [Z]
+ 1   2   3   4   5   6   7   8   9
+
