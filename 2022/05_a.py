@@ -23,6 +23,8 @@ class Solution:
     def __init__(self):
         self.aocd = AOCD(file_path=__file__)
         self.data = [x if x else "" for x in self.aocd.puzzle]
+        #with open("example.txt", "r") as f:
+        #    self.data = [x if x else "" for x in f.read().splitlines()]
         self.utilities = Utilities()
 
     def parse_input(self) -> tuple[list[str], list[str]]:
@@ -39,14 +41,23 @@ class Solution:
         Returns a dict of deques, with the stack number as the key.
         """
         starting_stacks = {}
-        filtered_stacks = [re.sub(r"\[\]", " ", x) for x in stack_input]
-        transposed_stacks = list(zip(*filtered_stacks))
-        transposed_filtered_stacks = [
-            x for x in transposed_stacks if any(ele.isalpha() for ele in x)
-        ]
-        for row in transposed_filtered_stacks:
-            starting_stacks[row[-1]] = collections.deque(row[:-1])
+        filtered_stacks = [x.replace("[", " ").replace("]", " ") for x in stack_input]
+        del filtered_stacks[-1]
+        transposed_filtered_stacks = [[*x] for x in zip(*filtered_stacks) if any(c.isalpha() for c in x)] 
+        for i, row in enumerate(transposed_filtered_stacks, start=1):
+            starting_stacks[str(i)] = collections.deque(x for x in row)
         return starting_stacks
+     
+    def get_crate(self, stacks: dict, move: str):
+        try:
+            crate = stacks[move[1]].popleft()
+        except IndexError as e:
+            # I feel like this is the issue - with a known input set and instructions,
+            # this shouldn't be needed, since the crane shouldn't be moving more crates than exist.
+            raise e
+        if not crate in string.ascii_uppercase:
+            self.get_crate(stacks, move)
+        return crate
 
     def perform_moves(self, moves: list[tuple], stacks: dict):
         """
@@ -55,8 +66,13 @@ class Solution:
         stacks: dict of deques, with the key being the stack number.
         """
         for move in moves:
-            for i in range(int(move[0])):
-                stacks[move[2]].appendleft(stacks[move[1]].popleft())
+            #input()
+            for _ in range(int(move[0])):
+                #crate_to_move = stacks[move[1]].popleft()
+                crate_to_move = self.get_crate(stacks, move)
+                #if crate_to_move is None:
+                #    return
+                stacks[move[2]].appendleft(crate_to_move)
 
     def make_final_stack_report(self, stacks: dict, final_stack: list):
         """
@@ -65,7 +81,7 @@ class Solution:
         for stack in stacks.values():
             while len(stack) > 0:
                 crate = stack.popleft()
-                if crate in string.ascii_uppercase:
+                if crate != "":
                     final_stack.append(crate)
                     stack.clear()
                     continue
@@ -74,6 +90,14 @@ class Solution:
 
         return final_stack
 
+    def debug_print(self, move, inputs, stacks):
+        print(f"\n{move}\n")
+        print("\n*** START ***")
+        for row in inputs[0]:
+            print(row)
+        print("\n*** FINISH ***")
+        for row in list(itertools.zip_longest(*stacks.values(), fillvalue=" ")):
+            print(" ".join([f"[{x}]" if x.isalpha() else "[ ]" for x in row]))
 
     def solve(self, crates: list):
         return "".join(crates)
@@ -85,12 +109,12 @@ if __name__ == "__main__":
     moves = re.findall(r"\d+", ",".join(inputs[1]))
     move_chunks = s.utilities.make_group(moves, 3)
     s.perform_moves(move_chunks, stacks)
-    print("\n*** START ***")
-    for row in inputs[0][:-1]:
-        print(row)
-    print("\n*** FINISH ***")
-    for row in list(itertools.zip_longest(*stacks.values(), fillvalue=" ")):
-        print(" ".join([f"[{x}]" if x in string.ascii_uppercase else " " for x in row]))
+    #print("\n*** START ***")
+    #for row in inputs[0]:
+    #    print(row)
+    #print("\n*** FINISH ***")
+    #for row in list(itertools.zip_longest(*stacks.values(), fillvalue=" ")):
+    #    print(" ".join([f"[{x}]" for x in row]))
     final_stack = s.make_final_stack_report(stacks, [])
     print(f"\n*** GUESS: {s.solve(final_stack)} ***")
 
