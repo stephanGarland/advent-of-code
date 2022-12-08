@@ -141,7 +141,7 @@ if __name__ == "__main__":
     inputs = s.parse_input()
     stacks = s.make_starting_stacks(inputs[0])
     moves = re.findall(r"\d+", ",".join(inputs[1]))
-    move_chunks = s.utilities.make_group(moves, 3)
+    move_chunks = s.utilities.make_groups(moves, 3)
     s.perform_moves(move_chunks, stacks)
     final_stack = s.make_final_stack_report(stacks, [])
     s.logger.info(f"*** GUESS: {s.solve(final_stack)} ***")

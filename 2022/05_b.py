@@ -76,7 +76,7 @@ if __name__ == "__main__":
     inputs = s.part_one.parse_input()
     stacks = s.part_one.make_starting_stacks(inputs[0])
     moves = re.findall(r"\d+", ",".join(inputs[1]))
-    move_chunks = s.utilities.make_group(moves, 3)
+    move_chunks = s.utilities.make_groups(moves, 3)
     s.perform_moves(move_chunks, stacks)
     final_stack = s.part_one.make_final_stack_report(stacks, [])
     answer = s.part_one.solve(final_stack)
