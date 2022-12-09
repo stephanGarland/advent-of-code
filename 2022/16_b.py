@@ -1,6 +1,5 @@
 from classes.template import AOCD as Base
 
-
 class AOCD(Base):
     pass
 
@@ -12,8 +11,10 @@ class Solution:
 
     def __init__(self):
         self.aocd = AOCD(file_path=__file__)
-        self.data = [x if x else "" for x in self.aocd.puzzle]
+        self.data = [int(x) if x else "" for x in self.aocd.puzzle]
+        self.utilities = Utilities()
 
 
 if __name__ == "__main__":
     s = Solution()
+
