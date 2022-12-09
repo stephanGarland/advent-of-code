@@ -143,7 +143,10 @@ if __name__ == "__main__":
                 day_path = pathlib.Path(f"{self.parent_dir}/{year}/{day:02d}.txt")
                 if not day_path.exists():
                     logging.debug(f"{day_path} not found, downloading new file")
-                    input_dict[(year, day)] = aocd.get_data(day=day, year=year)
+                    try:
+                        input_dict[(year, day)] = aocd.get_data(day=day, year=year)
+                    except aocd.exceptions.PuzzleLockedError:
+                        logging.error(f"{day_path} puzzle is not yet available")
                 else:
                     logging.debug(f"{day_path} exists, skipping")
 
@@ -189,7 +192,9 @@ if __name__ == "__main__":
         elif t.args.to_year and not t.args.from_year:
             t.args.from_year = t.args.to_year
         if t.args.to_year < t.args.from_year:
-            logging.fatal(f"invalid year range: to_year ({t.args.to_year}) < from_year ({t.args.from_year})")
+            logging.fatal(
+                f"invalid year range: to_year ({t.args.to_year}) < from_year ({t.args.from_year})"
+            )
             raise SystemExit(1)
     if t.args.download:
         input_files = t.download_inputs(t.args.from_year, t.args.to_year)
