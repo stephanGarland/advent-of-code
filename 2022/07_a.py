@@ -1,7 +1,7 @@
 import datetime
 import random
 
-from anytree import Node, render, search
+from anytree import Node, PostOrderIter, render
 
 from classes.template import AOCD as Base
 from classes.utilities import Utilities
@@ -88,50 +88,38 @@ class Solution:
         return f"{inode: <4} drwxr-xr-x {base_fmt}"
 
     def traverse_fs(self, data):
-        """
-        Iterates over the input, and for cd, appends '/'-delimited directories
-        to a list to build the absolute path. If the directory goes up one level
-        with '..', the last item of the list is deleted.
-
-        ls is skipped, because nothing needs to be done except read the next output.
-
-        """
-
         def _get_inode(self) -> int:
             self.alloc_inodes.append(self.inode.allocate())
             return self.alloc_inodes[-1]
 
         fs = Node(
-            "root",
+            "/",
             inode=_get_inode(self),
             file_size=0,
             ls_line="",
             is_dir=True,
             is_file=False,
         )
-        cwd = []
+        cwd = fs
         for line in data:
             if line[0] == "$":
                 if line[1] == "cd":
                     if line[2] == "/":
-                        cwd.append("root")
+                        cwd = fs
                     elif line[2] == "..":
-                        del cwd[-1]
+                        cwd = cwd.parent
                     else:
-                        cwd.append(f"{line[2]}")
-                continue
+                        for child in cwd.children:
+                            if child.name == line[2]:
+                                cwd = child
+
             inode = _get_inode(self)
-            parent = search.find(
-                fs,
-                lambda x: "/".join([str(node.name) for node in x.path])
-                == "/".join([x for x in cwd]),
-            )
             # Directory
             if line[0].isalpha():
                 Node(
                     line[1],
                     inode=inode,
-                    parent=parent,
+                    parent=cwd,
                     ls_line=self.make_ls_output(
                         file_name=line[1],
                         file_size=0,
@@ -148,7 +136,7 @@ class Solution:
                 Node(
                     line[1],
                     inode=inode,
-                    parent=parent,
+                    parent=cwd,
                     ls_line=self.make_ls_output(
                         file_name=line[1],
                         file_size=line[0],
@@ -171,7 +159,7 @@ class Solution:
         total_sizes = file_sizes + subdir_sizes
         if total_sizes <= 100_000:
             self.running_total += total_sizes
-        return self.running_total
+        return total_sizes
 
 
 if __name__ == "__main__":
@@ -181,11 +169,10 @@ if __name__ == "__main__":
     # Print`ls -li` output
     # node_items = [node for node in PostOrderIter(filesystem)]
     # for node in node_items:
-    #    print(node.ls_line)
+    #   print(node.ls_line)
 
     # Print tree
     # for pre, _, node in s.render.RenderTree(filesystem):
     #    print(f"{pre}{node.name}")
-    answer = s.solve(filesystem)
-    print(answer)
-    # s.aocd.submit_puzzle(answer)
+    s.solve(filesystem)
+    s.aocd.submit_puzzle(s.running_total)
