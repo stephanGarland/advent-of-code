@@ -34,6 +34,7 @@ pyflakes = ["+*", "-F401"]
 "flake8-*" = ["+*"]
 # explicitly disable plugin
 #flake8-docstrings = ["-*"]
+pycodestyle = ["+*", "-W503"]
 
 [tool.isort]
 profile = "black"
