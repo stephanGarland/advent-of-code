@@ -1,7 +1,7 @@
-import collections
-import itertools
-import operator
-import pathlib
+import datetime
+import random
+
+from anytree import Node, render, search
 
 from classes.template import AOCD as Base
 from classes.utilities import Utilities
@@ -9,6 +9,37 @@ from classes.utilities import Utilities
 
 class AOCD(Base):
     pass
+
+
+class Inode:
+    """
+    Little reason to have this, but I needed some way to uniquely
+    identify path stems, and I'm already committed to the fake filesystem.
+    Also, I wrote this for coding practice so it was a good excuse to use it.
+
+    It's O(n) for time complexity, and roughly O(log n) for space complexity.
+    Storing 10**9 ids consumes 127 MiB of RAM.
+    """
+
+    def __init__(self, id_max: int = 10**6):
+        self.id_max = id_max
+        self.ids = 1 << self.id_max
+
+    def allocate(self) -> int | None:
+        """
+        Iterates through a range(0, id_max), doing an
+        AND with ids and 1<<id_max. If the result is 0,
+        that bit is unallocated, and ids is OR'd with it
+        to set the bit.
+        """
+        for id in range(self.id_max):
+            if not self.ids & 1 << id:
+                self.ids |= 1 << id
+                return id
+        return None
+
+    def release(self, id: int):
+        self.ids = self.ids - (1 << id)
 
 
 class Solution:
@@ -20,17 +51,41 @@ class Solution:
     """
 
     def __init__(self):
+        self.alloc_inodes = []
         self.aocd = AOCD(file_path=__file__)
         self.data = [x.split() if x else "" for x in self.aocd.puzzle]
+        self.inode = Inode()
+        self.render = render
+        self.running_total = 0
         self.utilities = Utilities()
 
-    # https://gist.github.com/hrldcpr/2012250
-    def tree(self):
-        """
-        Creates an autovivifying tree out of defaultdicts
-        """
+    def make_ls_output(
+        self, file_name: str, file_size: str, human: bool, inode: int, is_file: bool
+    ) -> str:
+        def _human_size(file_size: int) -> str:
+            for unit in ["B", "K", "M", "G", "T", "P", "E"]:
+                if file_size < 1024 or unit == "P":
+                    break
+                file_size /= 1024
+            if unit == "B":
+                decimals = 0
+            elif file_size < 10:
+                decimals = 1
+            else:
+                decimals = 0
+            return f"{file_size:.{decimals}f}{unit}"
 
-        return collections.defaultdict(self.tree)
+        dt = (
+            datetime.datetime.now()
+            + datetime.timedelta(seconds=random.randrange(-(10**7), 10**7))
+        ).strftime("%h %d %H:%M")
+        if human:
+            file_size = _human_size(int(file_size))
+        base_fmt = f"1 sgarland  sgarland {file_size: <4} {dt} {file_name}"
+
+        if is_file:
+            return f"{inode: <4} -rw-r--r-- {base_fmt}"
+        return f"{inode: <4} drwxr-xr-x {base_fmt}"
 
     def traverse_fs(self, data):
         """
@@ -40,109 +95,97 @@ class Solution:
 
         ls is skipped, because nothing needs to be done except read the next output.
 
-        If an entry is an alpha, it's a directory name, so it's added to the tree.
-        If an entry is numeric, it's a file's size, so both the name and size are
-        added to the tree.
-
-        Example output, after being prettied up with this helper function,
-        then pretty-printed:
-
-        def print_tree(t):
-            return {k: print_tree(t[k]) for k in t}
-
-        pprint.pprint(print_tree(fs), width=60)
-        {'/': {'a': {},
-               'b.txt': {'14848514': {}},
-               'c.dat': {'8504156': {}},
-               'd': {}},
-         '/a/': {'e': {},
-                 'f': {'29116': {}},
-                 'g': {'2557': {}},
-                 'h.lst': {'62596': {}}},
-         '/a/e/': {'i': {'584': {}}},
-         '/d/': {'d.ext': {'5626152': {}},
-                 'd.log': {'8033020': {}},
-                 'j': {'4060174': {}},
-                 'k': {'7214296': {}}}}
         """
-        fs = self.tree()
+
+        def _get_inode(self) -> int:
+            self.alloc_inodes.append(self.inode.allocate())
+            return self.alloc_inodes[-1]
+
+        fs = Node(
+            "root",
+            inode=_get_inode(self),
+            file_size=0,
+            ls_line="",
+            is_dir=True,
+            is_file=False,
+        )
         cwd = []
         for line in data:
             if line[0] == "$":
-                # Since the commands only change dir by depth=1
-                # the cwd can be built in this way
                 if line[1] == "cd":
                     if line[2] == "/":
-                        cwd.append("/")
+                        cwd.append("root")
                     elif line[2] == "..":
                         del cwd[-1]
                     else:
-                        cwd.append(f"{line[2]}/")
-                elif line[1] == "ls":
-                    continue
+                        cwd.append(f"{line[2]}")
+                continue
+            inode = _get_inode(self)
+            parent = search.find(
+                fs,
+                lambda x: "/".join([str(node.name) for node in x.path])
+                == "/".join([x for x in cwd]),
+            )
             # Directory
             if line[0].isalpha():
-                fs["".join([f"{x}" for x in cwd])][line[1]]
+                Node(
+                    line[1],
+                    inode=inode,
+                    parent=parent,
+                    ls_line=self.make_ls_output(
+                        file_name=line[1],
+                        file_size=0,
+                        human=True,
+                        is_file=False,
+                        inode=inode,
+                    ),
+                    file_size=0,
+                    is_dir=True,
+                    is_file=False,
+                )
             # File
             elif line[0].isnumeric():
-                fs["".join([f"{x}" for x in cwd])][line[1]][line[0]]
+                Node(
+                    line[1],
+                    inode=inode,
+                    parent=parent,
+                    ls_line=self.make_ls_output(
+                        file_name=line[1],
+                        file_size=line[0],
+                        human=True,
+                        is_file=True,
+                        inode=inode,
+                    ),
+                    file_size=line[0],
+                    is_dir=False,
+                    is_file=True,
+                )
 
         return fs
 
-    def parse_fs(self, fs) -> dict[str, list[list[str]]]:
-        """
-        This takes the tree above and parses out the necessary information:
-        the size of all files contained in a given directory. This is done by
-        first making a 2D list with filenames and their size:
-
-        [['a', ''], ['b.txt', '14848514'], ['c.dat', '8504156'], ['d', '']]
-        [['e', ''], ['f', '29116'], ['g', '2557'], ['h.lst', '62596']]
-        [['i', '584']]
-        [['j', '4060174'], ['d.log', '8033020'], ['d.ext', '5626152'], ['k', '7214296']]
-
-
-        Then, the list is flattened, and the sizes are cast to an int if they're numeric.
-        The resultant list of integers is then summed, and stored as the value for its key.
-        """
-        parsed_fs = {}
-        for k, v in fs.items():
-            dir_listings = [
-                [file, "".join([x for x in v[file].keys()])] for file in v.keys()
-            ]
-            parsed_fs[k] = sum(
-                [
-                    int(x)
-                    for x in itertools.chain.from_iterable(dir_listings)
-                    if x.isnumeric()
-                ]
-            )
-
-        return parsed_fs
-
-    def make_candidate_dirs(self, parsed_fs):
-        candidates = []
-        for path, size in parsed_fs.items():
-            if size <= 100_000:
-                candidates.append(path)
-
-        return candidates
-
-    def check_for_duplication(self, candidates: list, parsed_fs: dict):
-        parsed_fs["extra"] = 0
-        for path_1, path_2 in itertools.permutations(candidates, 2):
-            if pathlib.PurePath(path_1).is_relative_to(pathlib.PurePath(path_2)):
-                parsed_fs["extra"] += parsed_fs[path_1]
-
-    def solve(self, candidates: list, parsed_fs: dict):
-        candidates.append("extra")
-        return sum(operator.itemgetter(*candidates)(parsed_fs))
+    def solve(self, filesystem: Node):
+        file_sizes = sum([int(x.file_size) for x in filesystem.children if x.is_file])
+        subdir_sizes = sum(
+            [self.solve(x) for x in filesystem.children if not x.is_file]
+        )
+        total_sizes = file_sizes + subdir_sizes
+        if total_sizes <= 100_000:
+            self.running_total += total_sizes
+        return self.running_total
 
 
 if __name__ == "__main__":
     s = Solution()
     filesystem = s.traverse_fs(s.data)
-    parsed_fs = s.parse_fs(filesystem)
-    candidates = s.make_candidate_dirs(parsed_fs)
-    duplicates = s.check_for_duplication(candidates, parsed_fs)
-    answer = s.solve(candidates, parsed_fs)
-    s.aocd.submit_puzzle(answer)
+
+    # Print`ls -li` output
+    # node_items = [node for node in PostOrderIter(filesystem)]
+    # for node in node_items:
+    #    print(node.ls_line)
+
+    # Print tree
+    # for pre, _, node in s.render.RenderTree(filesystem):
+    #    print(f"{pre}{node.name}")
+    answer = s.solve(filesystem)
+    print(answer)
+    # s.aocd.submit_puzzle(answer)
