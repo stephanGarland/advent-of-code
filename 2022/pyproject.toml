@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "aoc 2022"
+version = "0.1.0"
+description = "Advent of Code, 2022"
+authors = ["Stephan Garland <stephan.marc.garland@gmail.com>"]
+license = "MPL-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+more-itertools = "^9.0.0"
+black = "^22.12.0"
+isort = "^5.10.1"
+mypy = "^0.991"
+advent-of-code-data = "^1.3.2"
+anytree = "^2.8.0"
+nested-dict = "^1.61"
+fastcache = "^1.1.0"
+flake8-type-checking = "^2.3.0"
+flakeheaven = "^3.2.1"
+
+[tool.flakeheaven]
+max-complexity = 12
+format = "grouped"
+max_line_length = 88 
+show_source = true
+
+[tool.flakeheaven.plugins]
+# include everything in pyflakes except F401
+pyflakes = ["+*", "-F401"]
+# enable only codes from S100 to S199
+#flake8-bandit = ["-*", "+S1??"]
+# enable everything that starts from `flake8-`
+"flake8-*" = ["+*"]
+# explicitly disable plugin
+#flake8-docstrings = ["-*"]
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
