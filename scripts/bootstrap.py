@@ -52,7 +52,13 @@ class Template:
             "-v",
             "--verbose",
             action="store_true",
-            help="Print debug messages",
+            help="Set log level to DEBUG",
+        )
+        parser.add_argument(
+            "-q",
+            "--quiet",
+            action="store_true",
+            help="Set log level to FATAL",
         )
         parser.add_argument(
             "-t",
@@ -180,9 +186,16 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     t = Template()
+    if t.args.quiet:
+        log_level = logging.FATAL
+    elif t.args.verbose:
+        log_level = logging.DEBUG
+    else:
+        log_level = logging.INFO
+
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(message)s",
-        level=logging.DEBUG if t.args.verbose else logging.INFO,
+        level=log_level
     )
     if t.args.download or t.args.template:
         if not (t.args.from_year or t.args.to_year):
