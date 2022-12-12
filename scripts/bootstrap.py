@@ -5,6 +5,7 @@ import datetime
 import logging
 import os
 import pathlib
+from shutil import which
 from sys import version_info
 
 import aocd
@@ -22,20 +23,41 @@ class Template:
 
     def prerequisites_are_met(self):
         if not (
-            os.environ.get("AOC_SESSION") or pathlib.Path("$HOME/.config/aocd/token")
+            os.environ.get("AOC_SESSION")
+            or pathlib.Path(f"{str(pathlib.Path.home())}/.config/aocd/token").exists()
+            or self.args.aocd_dir
         ):
             logging.fatal(
-                "AOC session cookie not found - please set it with `export AOC_SESSION`"
+                "AOC session cookie or token not found, please set it as an env var or use --aoc-token"
             )
             return False
         if version_info.major < 3 or version_info.minor < 6:
             logging.fatal("Python version doesn't support f-strings, update to >= 3.6")
             return False
-
+        if not (which("git") or which("svn") or which("hg")):
+            if self.args.vcs:
+                logging.warning("--making-poor-decisions flag used")
+                try:
+                    with open("art.txt", "r") as f:
+                        an_art = f"\033[91m{f.read()}\033[0m"
+                    print(an_art)
+                except FileNotFoundError:
+                    pass
+            else:
+                logging.fatal(
+                    "no revision control system found in PATH - use --making-poor-decisions to ignore"
+                )
+                return False
         return True
 
     def make_args(self):
-        parser = argparse.ArgumentParser(description="Various functions for AoC.")
+        parser = argparse.ArgumentParser(description="Various functions for AoC")
+        parser.add_argument(
+            "-a",
+            "--aocd-dir",
+            dest="aocd_dir",
+            help="Alternate path to AoC token directory",
+        )
         parser.add_argument(
             "-d",
             "--download",
@@ -47,6 +69,12 @@ class Template:
             "--force",
             action="store_true",
             help="Forcibly overwrite existing files",
+        )
+        parser.add_argument(
+            "--making-poor-decisions",
+            action="store_true",
+            dest="vcs",
+            help="Disregard best practices and allow overwriting with no VCS",
         )
         parser.add_argument(
             "-v",
@@ -113,6 +141,8 @@ if __name__ == "__main__":
 
     def write_template(self, year_from, year_to):
         template = self.make_template()
+        overwrote = False
+        counter = 0
         for year in range(year_from, year_to + 1):
             for day in range(1, 26):
                 for letter in ["a", "b"]:
@@ -137,13 +167,28 @@ if __name__ == "__main__":
                         logging.error(f"{py_path} exists, skipping")
                         continue
                     elif py_path.exists() and self.args.force:
+                        overwrote = True
                         logging.warning(f"{py_path} exists, overwriting")
+                    counter += 1
                     with open(py_path, "w+") as f:
                         f.write(template)
 
+        if overwrote and self.args.force and self.args.quiet:
+            if self.args.vcs:
+                print(
+                    f"\nATTENTION: {counter} files overwritten, with no version control. "
+                    "git gud (is what you could use if you had version control)\n"
+                )
+            else:
+                print(
+                    f"\nATTENTION: {counter} files overwritten. If you need to roll some of them back, "
+                    "shell parameter expansion works well.\ne.g. git restore "
+                    "../2022/{{01..07}}_{{a,b}}.py to restore 2022/01_a.py - 2022/07_b.py\n"
+                )
+
     def download_inputs(
         self, year_from: int, year_to: int
-    ) -> dict[tuple[str, str], str]:
+    ) -> dict[tuple[int, int], str]:
         input_dict = {}
         for year in range(year_from, year_to + 1):
             for day in range(1, 26):
@@ -159,7 +204,7 @@ if __name__ == "__main__":
 
         return input_dict
 
-    def write_inputs(self, input_dict: dict[tuple[str, str], str]):
+    def write_inputs(self, input_dict: dict[tuple[int, int], str]):
         for k, v in input_dict.items():
             day_path = pathlib.Path(f"{self.parent_dir}/{k[0]}/{k[1]:02d}.txt")
             day_path.parent.mkdir(parents=True, exist_ok=True)
@@ -194,9 +239,11 @@ if __name__ == "__main__":
         log_level = logging.INFO
 
     logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        level=log_level
+        format="%(asctime)s - %(levelname)s - %(message)s", level=log_level
     )
+    if t.args.aocd_dir:
+        os.environ["AOCD_DIR"] = t.args.aocd_dir
+        print(os.environ["AOCD_DIR"])
     if t.args.download or t.args.template:
         if not (t.args.from_year or t.args.to_year):
             logging.fatal("year range not provided")
