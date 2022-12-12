@@ -81,6 +81,7 @@ class Template:
 
     def make_template(self):
         template = """from classes.template import AOCD as Base
+from classes.utilities import Utilities
 
 class AOCD(Base):
     pass
@@ -93,7 +94,7 @@ class Solution:
 
     def __init__(self):
         self.aocd = AOCD(file_path=__file__)
-        self.data = [int(x) if x else "" for x in self.aocd.puzzle]
+        self.data = [x for x in self.aocd.puzzle]
         self.utilities = Utilities()
 
 
