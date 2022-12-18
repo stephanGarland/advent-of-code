@@ -19,9 +19,7 @@ class Solution:
 
     def __init__(self):
         self.aocd = AOCD(file_path=__file__)
-        # self.data = [[int(y) for y in x] for x in self.aocd.puzzle]
-        with open("08_example.txt", "r") as f:
-            self.data = [[int(y) for y in x] for x in f.read().splitlines()]
+        self.data = [[int(y) for y in x] for x in self.aocd.puzzle]
         self.utilities = Utilities()
 
     def make_slices(
@@ -42,7 +40,7 @@ class Solution:
 
     def get_tree_slice(self, tree_matrix: list):
         visible = []
-        grid_length = len(tree_matrix) - 1 
+        grid_length = len(tree_matrix) - 1
         for row in range(grid_length):
             if row in [0, grid_length]:
                 continue
@@ -51,32 +49,38 @@ class Solution:
                     continue
                 coords = (row, col)
                 tree_slices = self.make_slices(coords, tree_matrix)
-                tree_is_visible = all(tree_matrix[coords[0]][coords[1]] > tree for tree in )
-                print(f"row: {tree_matrix[row]}\t visible: {[(k, v) for k,v in tree_slices.items()]}")
                 visible_trees = self.find_visible(coords, tree_matrix, tree_slices)
                 visible.append(visible_trees)
-        
+
         return visible
 
     def find_visible(
         self, coords: tuple, tree_matrix: list, tree_slices: dict[str, list[list[int]]]
     ):
-        visible = 0
-        for trees in tree_slices.values():
-            if all(tree_matrix[coords[0]][coords[1]] > tree for tree in trees):
-                visible += 1
-            #visible.append(
+        # visible = 0
+        for direction, trees in tree_slices.items():
+            all_visible = all(
+                tree_matrix[coords[0]][coords[1]] > tree for tree in trees
+            )
+            # print(f"tree {coords} ({tree_matrix[coords[0]][coords[1]]}) in {tree_matrix[coords[0]]} against {trees} (direction {direction}): {all_visible}")
+            if all_visible:
+                return True
+                # visible += 1
+            # visible.append(
             #    len(list(takewhile(lambda x: x < tree_matrix[coords[0]][coords[1]], v)))
-            #)
-        return visible
+            # )
+        return False
+        # return visible
 
     def solve(self):
-        return len(self.get_tree_slice(tree_matrix))
+        # Add the always visible trees on the perimeter, less the four duplicated corner trees
+        perimeter_addition = (2 * (2 * len(s.data))) - 4
+        return (
+            len([x for x in self.get_tree_slice(tree_matrix) if x]) + perimeter_addition
+        )
+
 
 if __name__ == "__main__":
     s = Solution()
     tree_matrix = s.data
-    visible = s.get_tree_slice(tree_matrix)
-    #for row in tree_matrix:
-    #    print(row)
-    #print(s.solve())
+    s.aocd.submit_puzzle(s.solve())
