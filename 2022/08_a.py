@@ -1,6 +1,3 @@
-from itertools import takewhile
-from more_itertools import flatten
-
 from classes.template import AOCD as Base
 from classes.utilities import Utilities
 
@@ -38,7 +35,7 @@ class Solution:
             "right": right_slice,
         }
 
-    def get_tree_slice(self, tree_matrix: list):
+    def loop_all_trees(self, tree_matrix: list) -> list:
         visible = []
         grid_length = len(tree_matrix) - 1
         for row in range(grid_length):
@@ -56,8 +53,7 @@ class Solution:
 
     def find_visible(
         self, coords: tuple, tree_matrix: list, tree_slices: dict[str, list[list[int]]]
-    ):
-        # visible = 0
+    ) -> bool:
         for direction, trees in tree_slices.items():
             all_visible = all(
                 tree_matrix[coords[0]][coords[1]] > tree for tree in trees
@@ -65,22 +61,17 @@ class Solution:
             # print(f"tree {coords} ({tree_matrix[coords[0]][coords[1]]}) in {tree_matrix[coords[0]]} against {trees} (direction {direction}): {all_visible}")
             if all_visible:
                 return True
-                # visible += 1
-            # visible.append(
-            #    len(list(takewhile(lambda x: x < tree_matrix[coords[0]][coords[1]], v)))
-            # )
         return False
-        # return visible
 
-    def solve(self):
+    def solve(self, tree_matrix: list) -> int:
         # Add the always visible trees on the perimeter, less the four duplicated corner trees
         perimeter_addition = (2 * (2 * len(s.data))) - 4
         return (
-            len([x for x in self.get_tree_slice(tree_matrix) if x]) + perimeter_addition
+            len([x for x in self.loop_all_trees(tree_matrix) if x]) + perimeter_addition
         )
 
 
 if __name__ == "__main__":
     s = Solution()
     tree_matrix = s.data
-    s.aocd.submit_puzzle(s.solve())
+    s.aocd.submit_puzzle(s.solve(tree_matrix))
