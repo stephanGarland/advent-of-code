@@ -24,10 +24,10 @@ class Solution:
     ) -> dict[str, list[list[int]]]:
         slices = {}
         row, col = coords
-        top_slice = [tree[col] for tree in tree_matrix][:row]
-        bottom_slice = [tree[col] for tree in tree_matrix][row + 1 :]
-        left_slice = tree_matrix[row][:col]
-        right_slice = tree_matrix[row][col + 1 :]
+        top_slice = [int(tree[col]) for tree in tree_matrix][:row]
+        bottom_slice = [int(tree[col]) for tree in tree_matrix][row + 1 :]
+        left_slice = [int(x) for x in tree_matrix[row][:col]]
+        right_slice = [int(x) for x in tree_matrix[row][col + 1 :]]
         return {
             "top": top_slice,
             "bottom": bottom_slice,
@@ -37,6 +37,7 @@ class Solution:
 
     def loop_all_trees(self, tree_matrix: list) -> list:
         visible = []
+        # Subtracting 1 since we're iterating over a 0-indexed range
         grid_length = len(tree_matrix) - 1
         for row in range(grid_length):
             if row in [0, grid_length]:
