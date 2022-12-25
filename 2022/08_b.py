@@ -1,4 +1,3 @@
-from itertools import takewhile
 from math import prod
 from more_itertools import seekable
 
@@ -22,9 +21,7 @@ class Solution:
 
     def __init__(self):
         self.aocd = AOCD(file_path=__file__)
-        # self.data = [x for x in self.aocd.puzzle]
-        with open("08_example.txt", "r") as f:
-            self.data = f.read().splitlines()
+        self.data = [x for x in self.aocd.puzzle]
         self.utilities = Utilities()
 
     def make_slices(
@@ -32,9 +29,9 @@ class Solution:
     ) -> dict[str, list[list[int]]]:
         slices = {}
         row, col = coords
-        top_slice = [int(tree[col]) for tree in tree_matrix][:row]
+        top_slice = [int(tree[col]) for tree in tree_matrix][:row][::-1]
         bottom_slice = [int(tree[col]) for tree in tree_matrix][row + 1 :]
-        left_slice = [int(x) for x in tree_matrix[row][:col]]
+        left_slice = [int(x) for x in tree_matrix[row][:col]][::-1]
         right_slice = [int(x) for x in tree_matrix[row][col + 1 :]]
         return {
             "top": top_slice,
@@ -63,29 +60,16 @@ class Solution:
     ) -> int:
         visible = []
         target_tree = int(tree_matrix[coords[0]][coords[1]])
-        msg = ""
         for direction, trees in tree_slices.items():
             visible_trees = 0
             it = seekable(trees)
             while bool(it):
-                msg = f"considering {trees} in direction {direction}: "
                 current_tree = next(it)
-                msg += f"current_tree: {current_tree}"
                 if current_tree < target_tree:
-                    msg += f" < {target_tree}, continue"
                     visible_trees += 1
-                    print(it.peek(0))
-                if it.peek(0) >= target_tree:
-                    msg += f"peeking: {it.peek(0)} is >= {target_tree}, break"
+                else:
                     visible_trees += 1
                     break
-                else:
-                    pass
-                    # msg += f"{it.peek(0)} is ? {target_tree}, freak out"
-                print(msg)
-                # if current_tree >= target_tree:
-                #    visible_trees += 1
-                #    break
             visible.append(visible_trees)
         return visible
 
@@ -98,11 +82,7 @@ class Solution:
 if __name__ == "__main__":
     s = Solution()
     tree_matrix = s.data
-    for row in tree_matrix:
-        print(row)
-    ans = s.solve(tree_matrix)
-    groups = s.utilities.make_groups(ans, 3)
-    for g in groups:
-        print(g)
-    for row in ans:
-        print(prod(row))
+    scores = s.solve(tree_matrix)
+    answer = max([prod(row) for row in scores])
+    s.aocd.submit_puzzle(answer)
+
