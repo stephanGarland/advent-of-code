@@ -10,8 +10,6 @@ from sys import version_info
 
 import aocd
 
-MAX_ALLOWED_CTIME_DELTA = 60
-
 
 class Template:
     def __init__(self):
@@ -151,26 +149,21 @@ if __name__ == "__main__":
                         f"{self.working_dir}/{year}/{day:02d}_{letter}.py"
                     )
                     py_path.parent.mkdir(parents=True, exist_ok=True)
-                    try:
-                        py_path_ctime = datetime.datetime.fromtimestamp(
-                            py_path.stat().st_ctime
-                        )
-                        py_path_ctime_delta = (
-                            datetime.datetime.now() - py_path_ctime
-                        ).seconds
-                    except FileNotFoundError:
+                    if py_path.exists():
+                        with open(py_path, "r") as f:
+                            if f.read() == template:
+                                logging.debug(
+                                    f"{py_path} exists and matches template, skipping"
+                                )
+                            elif not self.args.force:
+                                logging.debug(f"{py_path} exists, skipping")
+                                continue
+                            else:
+                                overwrote = True
+                                logging.warning(f"{py_path} exists, overwriting")
+                                counter += 1
+                    else:
                         logging.debug(f"{py_path} not found, writing new file")
-                        py_path_ctime_delta = 0
-                    if py_path.exists() and not (
-                        self.args.force
-                        or py_path_ctime_delta <= MAX_ALLOWED_CTIME_DELTA
-                    ):
-                        logging.error(f"{py_path} exists, skipping")
-                        continue
-                    elif py_path.exists() and self.args.force:
-                        overwrote = True
-                        logging.warning(f"{py_path} exists, overwriting")
-                    counter += 1
                     with open(py_path, "w+") as f:
                         f.write(template)
 
@@ -216,23 +209,21 @@ if __name__ == "__main__":
         for k, v in input_dict.items():
             day_path = pathlib.Path(f"{self.working_dir}/{k[0]}/{k[1]:02d}.txt")
             day_path.parent.mkdir(parents=True, exist_ok=True)
-            try:
-                day_path_ctime = datetime.datetime.fromtimestamp(
-                    day_path.stat().st_ctime
-                )
-                day_path_ctime_delta = (
-                    datetime.datetime.now() - day_path_ctime
-                ).seconds
-            except FileNotFoundError:
+            # TODO: determine if this and download_inputs should both do conflict checks
+            if day_path.exists():
+                with open(day_path, "r") as f:
+                    if f.read() == v:
+                        logging.debug(
+                            f"{day_path} exists and matches downloaded, skipping"
+                        )
+                        continue
+                    elif not self.args.force:
+                        logging.debug(f"{day_path} exists, skipping")
+                        continue
+                    else:
+                        logging.warning(f"{day_path} exists, overwriting")
+            else:
                 logging.debug(f"{day_path} not found, writing new file")
-                day_path_ctime_delta = 0
-            if day_path.exists() and not (
-                self.args.force or day_path_ctime_delta <= MAX_ALLOWED_CTIME_DELTA
-            ):
-                logging.error(f"{day_path} exists, skipping")
-                continue
-            elif day_path.exists() and self.args.force:
-                logging.warning(f"{day_path} exists, overwriting")
             with open(day_path, "w+") as f:
                 f.write(v)
 
