@@ -16,9 +16,10 @@ MAX_ALLOWED_CTIME_DELTA = 60
 class Template:
     def __init__(self):
         self.args = self.make_args()
-        self.parent_dir = pathlib.Path.cwd().parent
-        prereqs = self.prerequisites_are_met()
-        if not prereqs:
+        self.working_dir = "".join(
+            [f"{x}/" for x in pathlib.Path.cwd().parts if not x.isdigit()]
+        ).replace("//", "/")
+        if not self.prerequisites_are_met():
             raise SystemExit(1)
 
     def prerequisites_are_met(self):
@@ -147,7 +148,7 @@ if __name__ == "__main__":
             for day in range(1, 26):
                 for letter in ["a", "b"]:
                     py_path = pathlib.Path(
-                        f"{self.parent_dir}/{year}/{day:02d}_{letter}.py"
+                        f"{self.working_dir}/{year}/{day:02d}_{letter}.py"
                     )
                     py_path.parent.mkdir(parents=True, exist_ok=True)
                     try:
@@ -190,9 +191,16 @@ if __name__ == "__main__":
         self, year_from: int, year_to: int
     ) -> dict[tuple[int, int], str]:
         input_dict = {}
+        cur_date = datetime.datetime.now().date()
         for year in range(year_from, year_to + 1):
             for day in range(1, 26):
-                day_path = pathlib.Path(f"{self.parent_dir}/{year}/{day:02d}.txt")
+                if (
+                    datetime.datetime.strptime(f"{year}-12-{day}", "%Y-%m-%d").date()
+                    > cur_date
+                ):
+                    logging.debug("reached end of available puzzles, quitting early")
+                    return input_dict
+                day_path = pathlib.Path(f"{self.working_dir}/{year}/{day:02d}.txt")
                 if not day_path.exists():
                     logging.debug(f"{day_path} not found, downloading new file")
                     try:
@@ -206,7 +214,7 @@ if __name__ == "__main__":
 
     def write_inputs(self, input_dict: dict[tuple[int, int], str]):
         for k, v in input_dict.items():
-            day_path = pathlib.Path(f"{self.parent_dir}/{k[0]}/{k[1]:02d}.txt")
+            day_path = pathlib.Path(f"{self.working_dir}/{k[0]}/{k[1]:02d}.txt")
             day_path.parent.mkdir(parents=True, exist_ok=True)
             try:
                 day_path_ctime = datetime.datetime.fromtimestamp(
