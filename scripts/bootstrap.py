@@ -268,5 +268,5 @@ if __name__ == "__main__":
     if t.args.download:
         input_files = t.download_inputs(t.args.from_year, t.args.to_year)
         t.write_inputs(input_files)
-    elif t.args.template:
+    if t.args.template:
         t.write_template(t.args.from_year, t.args.to_year)
