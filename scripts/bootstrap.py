@@ -118,13 +118,14 @@ class Template:
         template = """from classes.template import AOCD as Base
 from classes.utilities import Utilities
 
+
 class AOCD(Base):
     pass
 
 
 class Solution:
     \"\"\"
-
+    Foobar
     \"\"\"
 
     def __init__(self):
@@ -135,7 +136,6 @@ class Solution:
 
 if __name__ == "__main__":
     s = Solution()
-
 """
 
         return template

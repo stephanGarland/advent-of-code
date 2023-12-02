@@ -3,6 +3,7 @@ import pathlib
 
 from classes.template import AOCD
 
+
 class Puzzle:
     def __init__(self):
         self.puzzle = AOCD()
@@ -15,6 +16,7 @@ class Puzzle:
     def get_puzzle(self):
         return self.puzzle.data
 
+
 class Solution:
     def __init__(self):
         self.puzzle_data = Puzzle().puzzle_data
@@ -23,8 +25,8 @@ class Solution:
         puzzle = list(self.puzzle_data)
         return puzzle.count("(") - puzzle.count(")")
 
+
 if __name__ == "__main__":
     puzzle = Puzzle()
     solution = Solution()
     puzzle.puzzle.submit_puzzle(solution.count())
-

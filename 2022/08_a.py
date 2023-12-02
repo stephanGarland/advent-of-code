@@ -42,7 +42,7 @@ class Solution:
 
     def get_tree_slice(self, tree_matrix: list):
         visible = []
-        grid_length = len(tree_matrix) - 1 
+        grid_length = len(tree_matrix) - 1
         for row in range(grid_length):
             if row in [0, grid_length]:
                 continue
@@ -51,11 +51,13 @@ class Solution:
                     continue
                 coords = (row, col)
                 tree_slices = self.make_slices(coords, tree_matrix)
-                tree_is_visible = all(tree_matrix[coords[0]][coords[1]] > tree for tree in )
-                print(f"row: {tree_matrix[row]}\t visible: {[(k, v) for k,v in tree_slices.items()]}")
+                # tree_is_visible = all(tree_matrix[coords[0]][coords[1]] > tree for tree in )
+                print(
+                    f"row: {tree_matrix[row]}\t visible: {[(k, v) for k,v in tree_slices.items()]}"
+                )
                 visible_trees = self.find_visible(coords, tree_matrix, tree_slices)
                 visible.append(visible_trees)
-        
+
         return visible
 
     def find_visible(
@@ -65,18 +67,19 @@ class Solution:
         for trees in tree_slices.values():
             if all(tree_matrix[coords[0]][coords[1]] > tree for tree in trees):
                 visible += 1
-            #visible.append(
+            # visible.append(
             #    len(list(takewhile(lambda x: x < tree_matrix[coords[0]][coords[1]], v)))
-            #)
+            # )
         return visible
 
     def solve(self):
         return len(self.get_tree_slice(tree_matrix))
 
+
 if __name__ == "__main__":
     s = Solution()
     tree_matrix = s.data
     visible = s.get_tree_slice(tree_matrix)
-    #for row in tree_matrix:
+    # for row in tree_matrix:
     #    print(row)
-    #print(s.solve())
+    # print(s.solve())

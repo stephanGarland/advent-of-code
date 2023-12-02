@@ -15,6 +15,7 @@ from classes.utilities import Utilities
 LOG_FORMAT = "%(levelname)s - %(message)s"
 DEBUG = False
 
+
 class AOCD(Base):
     pass
 
@@ -25,7 +26,7 @@ class Solution:
     is represented with an uppercase letter, and newline-separated
     instructions for moving crates from one stack to another,
     determine the crate that will be at the top of each stack
-    at the end. Note that the crane now moves multiple crates at a time. 
+    at the end. Note that the crane now moves multiple crates at a time.
     """
 
     def __init__(self):
@@ -39,7 +40,7 @@ class Solution:
         else:
             self.logger.setLevel(logging.INFO)
         self.utilities = Utilities()
-   
+
     def get_crates(self, stacks: dict, stack: str, num_crates: str):
         crates = collections.deque()
         for _ in range(int(num_crates)):
@@ -56,19 +57,17 @@ class Solution:
         <quantity_to_move>, <from_stack>, <to_stack>.
         stacks: dict of deques, with the key being the stack number.
         """
-        
+
         for move in moves:
-           self.logger.debug(f"retrieving {move[0]} crates from stack {move[1]}")
-           old_stacks = copy.deepcopy(stacks)
-           self.logger.debug(f"stack {move[1]} before move: {stacks[move[1]]}")
-           crates_to_move = self.get_crates(stacks, move[1], move[0])
-           self.logger.debug(
-               f"inserting crates {crates_to_move} into stack {move[2]}"
-           )
-           self.logger.debug(f"stack {move[1]} after move: {stacks[move[1]]}")
-           for crate in crates_to_move:
-               stacks[move[2]].appendleft(crate)
-           self.part_one.debug_visualize(move, old_stacks, stacks)
+            self.logger.debug(f"retrieving {move[0]} crates from stack {move[1]}")
+            old_stacks = copy.deepcopy(stacks)
+            self.logger.debug(f"stack {move[1]} before move: {stacks[move[1]]}")
+            crates_to_move = self.get_crates(stacks, move[1], move[0])
+            self.logger.debug(f"inserting crates {crates_to_move} into stack {move[2]}")
+            self.logger.debug(f"stack {move[1]} after move: {stacks[move[1]]}")
+            for crate in crates_to_move:
+                stacks[move[2]].appendleft(crate)
+            self.part_one.debug_visualize(move, old_stacks, stacks)
 
 
 if __name__ == "__main__":
