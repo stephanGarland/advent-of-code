@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import argparse
 import datetime
 import logging
@@ -9,6 +8,25 @@ from shutil import which
 from sys import version_info
 
 import aocd
+
+"""
+This bootstraps a new AoC directory structure.
+Specifically, it can:
+  * Template out some basic starter code, which exposes a day's input as
+    a list of strings
+  * Download your unique user's inputs for a given year range
+
+It attempts to have some safety checking while doing the above, and will not,
+for instance, clobber your existing work if you tell it to create new template
+files. It also checks to see if you have any kind of VCS installed, and if not,
+refuses to do anything without being forced.
+
+TODO:
+  * This relies on aocd's rate-limiting, which is less than ideal.
+    I'd like to insert a manual sleep IFF aocd did _not_ find a cached file,
+    but AFAICT that isn't exposed other than logging statements.
+    Trying to hook into its log handler proved more trouble than it was worth.
+"""
 
 
 class Template:
@@ -21,6 +39,7 @@ class Template:
             raise SystemExit(1)
 
     def prerequisites_are_met(self):
+        vcs_list = [".bzr", "CVS", ".git", ".hg", ".svn"]
         if not (
             os.environ.get("AOC_SESSION")
             or pathlib.Path(f"{str(pathlib.Path.home())}/.config/aocd/token").exists()
@@ -33,7 +52,13 @@ class Template:
         if version_info.major < 3 or version_info.minor < 6:
             logging.fatal("Python version doesn't support f-strings, update to >= 3.6")
             return False
-        if not (which("git") or which("svn") or which("hg")):
+
+        if not any(
+            [
+                pathlib.Path(pathlib.PurePath(self.working_dir).joinpath(vcs)).is_dir()
+                for vcs in vcs_list
+            ]
+        ):
             if self.args.vcs:
                 logging.warning("--making-poor-decisions flag used")
                 try:
