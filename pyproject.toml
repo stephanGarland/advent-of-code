@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "aoc 2023"
+name = "advent-of-code"
 version = "0.2.0"
-description = "Advent of Code, 2023"
+description = "Advent of Code"
 authors = ["Stephan Garland <stephan.marc.garland@gmail.com>"]
 license = "MPL-2.0"
 
@@ -10,13 +10,12 @@ python = "^3.11"
 more-itertools = "^9.0.0"
 black = "^23.11.0"
 isort = "^5.12.0"
-mypy = "^0.991"
+mypy = "^1.7.1"
 advent-of-code-data = "^2.0.1"
 anytree = "^2.8.0"
 nested-dict = "^1.61"
 fastcache = "^1.1.0"
-flake8-type-checking = "^2.3.0"
-flakeheaven = "^3.2.1"
+flakeheaven = "^3.3.0"
 
 [tool.flakeheaven]
 max-complexity = 12
@@ -25,18 +24,14 @@ max_line_length = 88
 show_source = true
 
 [tool.flakeheaven.plugins]
-# include everything in pyflakes except F401
 pyflakes = ["+*", "-F401"]
-# enable only codes from S100 to S199
-#flake8-bandit = ["-*", "+S1??"]
-# enable everything that starts from `flake8-`
-"flake8-*" = ["+*"]
-# explicitly disable plugin
-#flake8-docstrings = ["-*"]
-pycodestyle = ["+*", "-W503"]
+pycodestyle = ["+*", "-W503", "-E203"]
 
 [tool.isort]
 profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core"]
