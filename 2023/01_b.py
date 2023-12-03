@@ -1,4 +1,6 @@
-import more_itertools
+import re
+from enum import Enum
+from itertools import chain
 
 from classes.template import AOCD as Base
 from classes.utilities import Utilities
@@ -14,11 +16,15 @@ NUMBERS = {
     "eight": 8,
     "nine": 9,
 }
-NUMBER_MAX_LEN = max([len(x) for x in NUMBERS.keys()])
 
 
 class AOCD(Base):
     pass
+
+
+class Position(Enum):
+    FIRST = 0
+    LAST = -1
 
 
 class Solution:
@@ -33,37 +39,67 @@ class Solution:
         self.data = [x for x in self.aocd.puzzle]
         self.utilities = Utilities()
 
-    def find_first_number(self, line: str) -> int:
-        try:
-            return int(line[0])
-        except ValueError:
-            pass
-        window: list[tuple[str]] = more_itertools.sliding_window(line, NUMBER_MAX_LEN)
-        for win in window:
-            digit = [x for x in win if x.isdigit()]
-            # smallest possible alpha number takes three chars
-            if digit and win.index(digit[0]) < 3:
-                return int(digit[0])
-            bitmap = [x in "".join(win) for x in NUMBERS.keys()]
-            number = [x for x in [a and b for a, b in zip(bitmap, NUMBERS.keys())] if x]
-            try:
-                if (digit and not number) or (
-                    (digit and number) and (win.index(digit[0]) < win.index(number[0]))
-                ):
-                    return int(digit[0])
-                elif number:
-                    return NUMBERS[number[0]]
-                else:
-                    pass
-                    print(f"found nothing: {''.join(win)}")
-            except ValueError:
-                breakpoint()
+    def find_all_indices(self, string, substring):
+        pattern = re.escape(substring)
+        indices = [match.span() for match in re.finditer(pattern, string)]
+        return [indices] if indices else [[-1]]
+
+    def get_nth_index(self, index_map: list[tuple], position: Enum) -> list[tuple]:
+        return [x[position.value] for x in index_map]
+
+    def find_first_and_last_number(self, line: str) -> tuple[int, int]:
+        number_map = list(
+            chain(*[self.find_all_indices(line, x) for x in NUMBERS.keys()])
+        )
+        digit_map = list(
+            chain(*[self.find_all_indices(line, str(x)) for x in NUMBERS.values()])
+        )
+        result_map = list(zip(number_map, digit_map))
+
+        number_indices = self.get_nth_index(result_map, Position.FIRST)
+        digit_indices = self.get_nth_index(result_map, Position.LAST)
+
+        number_indices = [
+            x for x in list(chain(*number_indices)) if isinstance(x, tuple)
+        ]
+        digit_indices = [x for x in list(chain(*digit_indices)) if isinstance(x, tuple)]
+
+        if digit_indices:
+            first_digit_idx = min([min(x) for x in digit_indices])
+            last_digit_idx = max([min(x) for x in digit_indices])
+            first_digit = int(line[first_digit_idx])
+            last_digit = int(line[last_digit_idx])
+
+        if number_indices:
+            first_number_idx = min([x for x in number_indices])
+            last_number_idx = max([x for x in number_indices])
+            first_number_str = line[first_number_idx[0] : first_number_idx[-1]]
+            last_number_str = line[last_number_idx[0] : last_number_idx[-1]]
+            first_number = NUMBERS[first_number_str]
+            last_number = NUMBERS[last_number_str]
+
+        if digit_indices and not number_indices:
+            return first_digit, last_digit
+
+        elif number_indices and not digit_indices:
+            return first_number, last_number
+
+        if min(digit_indices) < min(number_indices):
+            first_val = first_digit
+        else:
+            first_val = first_number
+
+        if max(digit_indices) > max(number_indices):
+            last_val = last_digit
+        else:
+            last_val = last_number
+
+        return first_val, last_val
 
     def solve(self) -> int:
         sum_nums = 0
         for line in s.data:
-            first_num = s.find_first_number(line)
-            last_num = s.find_first_number(line[::-1])
+            first_num, last_num = s.find_first_and_last_number(line)
             sum_nums += int(f"{first_num}{last_num}")
 
         return sum_nums
@@ -71,4 +107,4 @@ class Solution:
 
 if __name__ == "__main__":
     s = Solution()
-    print(s.solve())
+    s.aocd.submit_puzzle(s.solve())
