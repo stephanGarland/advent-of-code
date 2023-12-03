@@ -1,4 +1,5 @@
 import itertools
+
 import more_itertools
 
 
@@ -10,9 +11,10 @@ class Utilities:
 
     def find_first_unique_window(
         self, datastream, window_size: int, inclusive: bool = False
-    ) -> int:
+    ) -> int | None:
         for i, window in enumerate(datastream):
             if len(set(window)) == window_size:
                 if inclusive:
                     return i + window_size
                 return i
+        return None
