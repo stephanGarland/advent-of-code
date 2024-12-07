@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+
 import argparse
 import datetime
 import logging
 import os
 import pathlib
-from shutil import which
+import string
 from sys import version_info
+from typing import Dict
 
 import aocd
 
@@ -38,7 +40,7 @@ class Template:
         if not self.prerequisites_are_met():
             raise SystemExit(1)
 
-    def prerequisites_are_met(self):
+    def prerequisites_are_met(self) -> bool:
         vcs_list = [".bzr", "CVS", ".git", ".hg", ".svn"]
         if not (
             os.environ.get("AOC_SESSION")
@@ -59,10 +61,12 @@ class Template:
                 for vcs in vcs_list
             ]
         ):
-            if self.args.vcs:
+            if self.args.no_vcs:
                 logging.warning("--making-poor-decisions flag used")
                 try:
-                    with open("art.txt", "r") as f:
+                    with open(
+                        f"{pathlib.Path(__file__).parent.parent}/scripts/art.txt", "r"
+                    ) as f:
                         an_art = f"\033[91m{f.read()}\033[0m"
                     print(an_art)
                 except FileNotFoundError:
@@ -74,12 +78,11 @@ class Template:
                 return False
         return True
 
-    def make_args(self):
+    def make_args(self) -> argparse.Namespace:
         parser = argparse.ArgumentParser(description="Various functions for AoC")
         parser.add_argument(
             "-a",
             "--aocd-dir",
-            dest="aocd_dir",
             help="Alternate path to AoC token directory",
         )
         parser.add_argument(
@@ -97,7 +100,7 @@ class Template:
         parser.add_argument(
             "--making-poor-decisions",
             action="store_true",
-            dest="vcs",
+            dest="no_vcs",
             help="Disregard best practices and allow overwriting with no VCS",
         )
         parser.add_argument(
@@ -121,94 +124,109 @@ class Template:
         parser.add_argument(
             "-y",
             "--from-year",
-            dest="from_year",
-            default=0,
+            default=datetime.datetime.now().year,
             type=int,
             help="The year range start to use",
         )
         parser.add_argument(
             "-Y",
             "--to-year",
-            dest="to_year",
-            default=0,
+            default=datetime.datetime.now().year,
             type=int,
             help="The year range end to use",
         )
 
         return parser.parse_args()
 
-    def make_template(self):
-        template = """from classes.template import AOCD as Base
-from classes.utilities import Utilities
+    def make_template(self) -> string.Template:
+        template = string.Template("""from utils import utilities
+from utils.base_class import AbstractAOCD
 
 
-class AOCD(Base):
-    pass
-
-
-class Solution:
+class PartA(AbstractAOCD):
     \"\"\"
-    Foobar
+    Placeholder docstring for Day $day_name Part A.
     \"\"\"
 
-    def __init__(self):
-        self.aocd = AOCD(file_path=__file__)
-        self.data = [x for x in self.aocd.puzzle]
-        self.utilities = Utilities()
+    def __init__(self, file_path):
+        super().__init__(file_path)
+        self.data = self.parse_input(self.aocd.puzzle)
+
+    def parse_input(self, raw_data: List[str]):
+        pass
+
+    def solve(self):
+        pass
+
+
+class PartB(PartA):
+    \"\"\"
+    Placeholder docstring for Day $day_name Part B.
+    \"\"\"
+
+    def solve(self):
+        pass
 
 
 if __name__ == "__main__":
-    s = Solution()
-"""
-
+    args = utilities.parse_args()
+    utilities.print_or_submit_solution(
+        PartA, PartB, __file__, args.part, args.submit, args.debug
+    )
+""")
         return template
 
     def write_template(self, year_from, year_to):
         template = self.make_template()
         overwrote = False
         counter = 0
+
         for year in range(year_from, year_to + 1):
             for day in range(1, 26):
-                for letter in ["a", "b"]:
-                    py_path = pathlib.Path(
-                        f"{self.working_dir}/{year}/{day:02d}_{letter}.py"
-                    )
-                    py_path.parent.mkdir(parents=True, exist_ok=True)
-                    if py_path.exists():
-                        with open(py_path, "r") as f:
-                            if f.read() == template:
-                                logging.debug(
-                                    f"{py_path} exists and matches template, skipping"
-                                )
-                            elif not self.args.force:
-                                logging.debug(f"{py_path} exists, skipping")
-                                continue
-                            else:
-                                overwrote = True
-                                logging.warning(f"{py_path} exists, overwriting")
-                                counter += 1
-                    else:
-                        logging.debug(f"{py_path} not found, writing new file")
-                    with open(py_path, "w+") as f:
-                        f.write(template)
+                py_path = pathlib.Path(f"{self.working_dir}/{year}/{day:02d}.py")
+                py_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if overwrote and self.args.force and self.args.quiet:
-            if self.args.vcs:
-                print(
-                    f"\nATTENTION: {counter} files overwritten, with no version control. "
-                    "git gud (is what you could use if you had version control)\n"
-                )
-            else:
-                print(
-                    f"\nATTENTION: {counter} files overwritten. If you need to roll some of them back, "
-                    "shell parameter expansion works well.\ne.g. git restore "
-                    "../2022/{{01..07}}_{{a,b}}.py to restore 2022/01_a.py - 2022/07_b.py\n"
-                )
+                template_values = {"day_name": f"{day:02d}"}
+
+                file_content = template.substitute(template_values)
+
+                if py_path.exists():
+                    with open(py_path, "r") as f:
+                        if f.read() == file_content:
+                            pass
+                            logging.debug(
+                                f"{py_path} exists and matches template, skipping"
+                            )
+                        elif not self.args.force:
+                            logging.debug(f"{py_path} exists, skipping")
+                            continue
+                        else:
+                            overwrote = True
+                            logging.warning(f"{py_path} exists, overwriting")
+                            counter += 1
+                else:
+                    logging.debug(f"{py_path} not found, writing new file")
+
+                with open(py_path, "w+") as f:
+                    f.write(file_content)
+
+            if overwrote:
+                if self.args.no_vcs:
+                    print(
+                        f"\nATTENTION: {counter} files overwritten, with no version control. "
+                        "git gud (is what you could use if you had version control)\n"
+                    )
+                else:
+                    print(
+                        f"\nATTENTION: {counter} files overwritten. If you need to roll some of them back, "
+                        "shell parameter expansion works well.\ne.g. git restore "
+                        "../2022/{{01..07}}_{{a,b}}.py to restore 2022/01_a.py - 2022/07_b.py\n"
+                    )
 
     def download_inputs(
         self, year_from: int, year_to: int
     ) -> dict[tuple[int, int], str]:
-        input_dict = {}
+        input_dict: Dict = {}
         cur_date = datetime.datetime.now().date()
         for year in range(year_from, year_to + 1):
             for day in range(1, 26):
