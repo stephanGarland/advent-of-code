@@ -139,7 +139,9 @@ class Template:
         return parser.parse_args()
 
     def make_template(self) -> string.Template:
-        template = string.Template("""from utils import utilities
+        template = string.Template("""from typing import List
+
+from utils import utilities
 from utils.base_class import AbstractAOCD
 
 

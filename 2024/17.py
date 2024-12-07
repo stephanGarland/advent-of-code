@@ -1,3 +1,5 @@
+from typing import List
+
 from utils import utilities
 from utils.base_class import AbstractAOCD
 
