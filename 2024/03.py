@@ -19,7 +19,7 @@ class PartA(AbstractAOCD):
     def parse_input(self, raw_data: List[str]):
         return "".join(raw_data)
 
-    def get_muls(self) -> List[str]:
+    def get_muls(self) -> List[re.Match]:
         return list(re.finditer(r"(mul\((\d+,\d+)\))", self.data, re.MULTILINE))
 
     def solve(self):
@@ -35,7 +35,7 @@ class PartB(PartA):
     unless "do()" occurs to reset the logic.
     """
 
-    def _get_mul_matches(self, s: str) -> List[re.Match]:
+    def _get_mul_matches(self, s: str) -> List[str]:
         return re.findall(r"mul\((\d+),(\d+)\)", s)
 
     def _split_dos(self) -> List[str]:
@@ -47,7 +47,7 @@ class PartB(PartA):
     def solve(self):
         products: List[int] = []
         dos_split: List[str] = self._split_dos()
-        mul_matches: List[re.Match] = []
+        mul_matches: List[str] = []
 
         for ele in dos_split:
             mul_matches.extend(self._get_mul_matches(self._split_donts(ele)))

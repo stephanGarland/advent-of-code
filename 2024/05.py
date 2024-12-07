@@ -7,8 +7,8 @@ from utils.base_class import AbstractAOCD
 
 
 class Data(NamedTuple):
-    ordering: List[Tuple[int]]
-    updates: List[Tuple[int]]
+    ordering: List[Tuple[int, ...]]
+    updates: List[Tuple[int, ...]]
 
 
 class PartA(AbstractAOCD):
@@ -41,7 +41,7 @@ class PartA(AbstractAOCD):
 
         return Data(ordering=ordering, updates=updates)
 
-    def make_graph(self, update: Tuple[int]) -> Dict[int, Set[int]]:
+    def make_graph(self, update: Tuple[int, ...]) -> Dict[int, Set[int]]:
         graph = defaultdict(set)
         for rule in self.data.ordering:
             if set(rule).issubset(update):
@@ -57,7 +57,7 @@ class PartA(AbstractAOCD):
 
         return tuple(ts.static_order())
 
-    def solve(self):
+    def solve(self) -> int:
         middle_nums: List[int] = []
         for update in self.data.updates:
             graph: Dict[int, Set[int]] = self.make_graph(update)
@@ -75,7 +75,7 @@ class PartB(PartA):
     What is the sum of these now-correctly ordered update instructions?
     """
 
-    def solve(self):
+    def solve(self) -> int:
         middle_nums: List[int] = []
         for update in self.data.updates:
             graph: Dict[int, Set[int]] = self.make_graph(update)

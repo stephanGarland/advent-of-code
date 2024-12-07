@@ -2,7 +2,7 @@ import argparse
 from collections import deque
 import inspect
 import itertools
-from typing import Generator, List, Optional, Sequence, Union
+from typing import Any, Generator, List, Optional, Sequence, Union
 
 
 def print_or_submit_solution(
@@ -111,7 +111,7 @@ def sliding_window(iterable, n: int) -> Generator:
         window.append(x)
         yield tuple(window)
 
-def transpose_list(lst: List[List], join: bool = False) -> List[Union[List, str]]:
+def transpose_list(lst: List[List], join: bool = False) -> List[Any]:
     """Transposes a 2D list."""
 
     if join:

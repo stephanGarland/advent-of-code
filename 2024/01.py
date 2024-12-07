@@ -25,7 +25,7 @@ class PartOne(AbstractAOCD):
     ) -> int:
         return transformation(operator(*pair))
 
-    def get_pair_diffs(self, cols: List[Tuple[int, ...]]) -> List[int]:
+    def get_pair_diffs(self, cols: List[List[int]]) -> List[int]:
         get_abs_diff = partial(self._apply_pairwise_transformation, sub, abs)
         return list(map(get_abs_diff, cols))
 

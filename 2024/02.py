@@ -55,7 +55,7 @@ class PartB(PartA):
     What is the row count matching these requirements?
     """
 
-    def check_levels(self, levels: List[List[int]]) -> bool:
+    def check_levels(self, levels: List[List[int]]) -> int:
         MAX_CHECKS: int = 1
         MIN_DIFF: int = 1
         MAX_DIFF: int = 3
